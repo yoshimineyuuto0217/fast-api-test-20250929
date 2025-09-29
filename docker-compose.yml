@@ -1,0 +1,35 @@
+version: "3.9"
+services:
+  fast-api:
+    # .は同じ階層にあるDockerFileをビルドしてくれる
+    build: .
+    #ここでブラウザの8000番とdockerの8000番を接続
+    ports:
+      - "8000:8000"
+    #ローカルのsrcをdockerのappにコピー（マウント)
+    volumes:
+      - ./src:/app
+    #DBに接続する
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://user:password@fast-api-db:5432/mydb
+    #DBのdocker環境が動いてから立ち上がるように設定 (依存関係の設定)
+    depends_on:
+      - fast-api-db
+
+  fast-api-db:
+    #今回のDBで使うDBの設定
+    image: postgres:15
+    #DB起動に使うユーザー設定
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: mydb
+    #DBで使うport設定
+    ports:
+      - "5432:5432"
+    #DB情報を保持してくれてる (docker側のディレクトリに保存)
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
