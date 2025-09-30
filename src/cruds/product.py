@@ -60,7 +60,36 @@ async def read_product_summary(db: AsyncSession) -> list[product_schema.ProductS
         ).group_by(product_model.Product.product_name)
     )
     rows = result.all()
+    #以下の返却方法は型安全性が高いものになるレスポンススキーマに沿ったものになる
+    #for文でオブジェクトを一つずつ取り出して型チェックしてる
     return [
         product_schema.ProductSummary(product_name=row[0], total_quantity=row[1])
         for row in rows
     ]
+
+# 製品の削除 | DELETE
+async def delete_product(db: AsyncSession, product_id: int) -> None:
+    try:
+        # 指定されたIDの製品を探す
+        result = await db.execute(
+            select(product_model.Product).filter(product_model.Product.product_id == product_id)
+        )
+        product = result.scalar_one_or_none()
+
+        if product is None:
+            raise HTTPException(
+                status_code=sc.INTERNAL_SERVER_ERROR.value,
+                detail=f"{em.MESSAGE_002.value} - 指定された製品が存在しません (id={product_id})"
+            )
+
+        # 削除処理
+        await db.delete(product)
+        await db.commit()
+
+    except SQLAlchemyError as e:
+        await db.rollback()
+        error_detail = "".join(traceback.format_exception_only(type(e), e))
+        raise HTTPException(
+            status_code=sc.INTERNAL_SERVER_ERROR.value,
+            detail=f"{em.MESSAGE_002.value} - {error_detail}"
+        )
