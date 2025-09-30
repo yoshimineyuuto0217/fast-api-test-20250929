@@ -15,6 +15,10 @@ class ProductBase(BaseModel):
 class ProductCreate(ProductBase):
     pass
 
+class ProductSummary(BaseModel):
+    product_name:str
+    total_quantity:int
+
 
 class ResponseProduct(ProductBase):
     product_id: int

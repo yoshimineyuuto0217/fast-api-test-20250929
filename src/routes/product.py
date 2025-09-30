@@ -17,9 +17,19 @@ async def read_product(db: AsyncSession = Depends(get_db)):
     return await product_crud.read_product(db)
 
 
+# 商品の合計値を取得
+@router.get(
+    "/product/summary", response_model=list[product_schema.ProductSummary], tags={"product"}
+)
+async def read_product_summary(db: AsyncSession = Depends(get_db)):
+    return await product_crud.read_product_summary(db)
+
+
 # 商品を登録
 @router.post(
-    "/product/", response_model=product_schema.ResponseProduct, tags=["product"],
+    "/product/",
+    response_model=product_schema.ResponseProduct,
+    tags=["product"],
 )
 async def create_product(
     product: product_schema.ProductCreate,

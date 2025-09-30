@@ -8,7 +8,7 @@ import models.product as product_model
 from datetime import datetime, timezone
 from enums.error_messages import ErrorMessages as em
 from enums.status_codes import StatusCodes as sc
-from sqlalchemy.future import select
+from sqlalchemy import select, func
 import traceback
 
 
@@ -44,7 +44,23 @@ async def create_product(
         detail=f"{em.MESSAGE_002.value} - {error_detail}",
     )
 
+
 # 製品情報を取得 | GET
-async def read_product(db:AsyncSession) -> list[product_model.Product]:
+async def read_product(db: AsyncSession) -> list[product_model.Product]:
     result = await db.execute(select(product_model.Product))
     return result.scalars().all()
+
+
+# 製品の集計情報を取得 | GET
+async def read_product_summary(db: AsyncSession) -> list[product_schema.ProductSummary]:
+    result = await db.execute(
+        select(
+            product_model.Product.product_name,
+            func.sum(product_model.Product.product_quantity).label("total_quantity"),
+        ).group_by(product_model.Product.product_name)
+    )
+    rows = result.all()
+    return [
+        product_schema.ProductSummary(product_name=row[0], total_quantity=row[1])
+        for row in rows
+    ]
