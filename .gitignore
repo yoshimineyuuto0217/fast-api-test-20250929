@@ -1,0 +1,11 @@
+# Python bytecode
+*.pyc
+__pycache__/
+
+# macOS-specific files
+.DS_Store
+
+# 環境変数
+.env.development
+.env
+etc/secrets/.env.production
