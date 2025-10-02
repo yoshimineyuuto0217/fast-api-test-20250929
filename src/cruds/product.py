@@ -44,10 +44,11 @@ async def create_product(
         detail=f"{em.MESSAGE_002.value} - {error_detail}",
     )
 
-
 # 製品情報を取得 | GET
-async def read_product(db: AsyncSession) -> list[product_model.Product]:
-    result = await db.execute(select(product_model.Product))
+async def read_product(db: AsyncSession, skip: int = 0, limit: int = 1000):
+    result = await db.execute(
+        select(product_model.Product).offset(skip).limit(limit)
+    )
     return result.scalars().all()
 
 
