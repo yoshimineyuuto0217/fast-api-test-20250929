@@ -10,7 +10,6 @@ product_names = ["製品1", "製品2", "製品3", "製品4", "製品5"]
 
 with open("products.csv", "w", newline="", encoding="utf-8") as f:
     writer = csv.writer(f)
-
     # ヘッダー行を JSON のキーに合わせる
     writer.writerow(
         [
